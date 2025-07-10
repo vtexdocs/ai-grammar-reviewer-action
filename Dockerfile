@@ -9,7 +9,6 @@ RUN apt-get update && \
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-COPY src/grammar_reviewer.py /github/workspace/grammar_reviewer.py
-COPY src/generate_rdjsonl.py /github/workspace/generate_rdjsonl.py
+COPY src /action
 
 ENTRYPOINT ["/entrypoint.sh"]
