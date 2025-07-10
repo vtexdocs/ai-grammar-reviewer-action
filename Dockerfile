@@ -7,8 +7,9 @@ RUN apt-get update && \
     apt-get install -y curl && \
     curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b /usr/local/bin
 
-COPY ./src /github/workspace
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+COPY src/grammar_reviewer.py /github/workspace/grammar_reviewer.py
+COPY src/generate_rdjsonl.py /github/workspace/generate_rdjsonl.py
 
 ENTRYPOINT ["/entrypoint.sh"]
