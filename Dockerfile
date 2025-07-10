@@ -12,4 +12,4 @@ COPY entrypoint.sh /action
 WORKDIR /action
 RUN chmod +x entrypoint.sh
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/action/entrypoint.sh"]
