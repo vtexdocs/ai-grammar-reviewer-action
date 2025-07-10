@@ -9,7 +9,7 @@ RUN apt-get update && \
 
 COPY src/ /action
 COPY entrypoint.sh /action
-RUN chmod +x entrypoint.sh
 WORKDIR /action
+RUN chmod +x entrypoint.sh
 
-ENTRYPOINT ["/action/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
