@@ -2,6 +2,7 @@
 set -e
 
 cd /github/workspace
+ls -l
 python grammar_reviewer.py
 if [ -f issues.json ]; then
   python generate_rdjsonl.py
