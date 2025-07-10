@@ -1,0 +1,48 @@
+name: Grammar AI Review
+description: 'Reviews Markdown files for grammar using Gemini and Reviewdog'
+inputs:
+  gemini_api_key:
+    description: 'Gemini API Key'
+    required: true
+  github_token:
+    description: 'GitHub Token'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    # Step 1: Set up Python
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    # Step 2: Install necessary dependencies
+    - name: Install python dependencies
+      run: pip install -r src/requirements.txt
+      shell: bash
+
+    - name: Install reviewdog
+      uses: reviewdog/action-setup@v1
+
+    # Step 3: Run grammar reviewer on Markdown files using Gemini and create issues.json file
+    - name: Run grammar review on Markdown files
+      env:
+        GEMINI_API_KEY: ${{ inputs.gemini_api_key }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+      run: python src/grammar_reviewer.py
+      shell: bash
+
+    # Step 4: Convert issues.json to suggestions.rdjsonl (RDFormat)
+    # https://github.com/reviewdog/reviewdog/tree/master/proto/rdf
+    - name: Convert issues to rdjsonl
+      if: success() && test -f issues.json
+      run: python src/generate_rdjsonl.py
+      shell: bash
+
+    # Step 6: Post suggestions with reviewdog
+    - name: Run reviewdog
+      env:
+        REVIEWDOG_GITHUB_API_TOKEN: ${{ inputs.github_token }}
+      if: success() && test -f suggestions.rdjsonl
+      run: reviewdog -f=rdjsonl -name="Grammar reviewer" -reporter=github-pr-review -tee -filter-mode=nofilter < suggestions.rdjsonl
+      shell: bash
