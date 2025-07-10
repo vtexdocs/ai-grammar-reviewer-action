@@ -1,5 +1,5 @@
-name: Grammar AI Review
-description: 'Reviews Markdown files for grammar using Gemini and Reviewdog'
+name: Grammar Review Action
+description: 'Reviews Markdown files for grammar using Gemini and reviewdog'
 inputs:
   gemini_api_key:
     description: 'Gemini API Key'
