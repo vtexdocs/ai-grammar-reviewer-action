@@ -115,7 +115,8 @@ def main():
     # Post one comment with all summaries and feedback
     if summaries:
         feedback = "\n\n<hr><h2 id=\"ai-feedback\">Was this feedback useful?</h2>\n\n- [ ] Yes\n- [ ] No"
-        post_pr_comment(f"## Grammar review summary\n\n{'\n\n'.join(summaries)}{feedback}")
+        full_comment = "## Grammar review summary\n\n" + "\n\n".join(summaries) + feedback
+        post_pr_comment(full_comment)
 
     # Write all issues to a single issues.json file
     with open("issues.json", "w", encoding="utf-8") as f:
