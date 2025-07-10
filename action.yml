@@ -18,7 +18,7 @@ runs:
 
     # Step 2: Install necessary dependencies
     - name: Install python dependencies
-      run: pip install -r src/requirements.txt
+      run: pip install -r ./src/requirements.txt
       shell: bash
 
     - name: Install reviewdog
@@ -29,14 +29,14 @@ runs:
       env:
         GEMINI_API_KEY: ${{ inputs.gemini_api_key }}
         GITHUB_TOKEN: ${{ inputs.github_token }}
-      run: python src/grammar_reviewer.py
+      run: python ./src/grammar_reviewer.py
       shell: bash
 
     # Step 4: Convert issues.json to suggestions.rdjsonl (RDFormat)
     # https://github.com/reviewdog/reviewdog/tree/master/proto/rdf
     - name: Convert issues to rdjsonl
       if: success() && hashFiles('issues.json') != ''
-      run: python src/generate_rdjsonl.py
+      run: python ./src/generate_rdjsonl.py
       shell: bash
 
     # Step 5: Post suggestions with reviewdog
