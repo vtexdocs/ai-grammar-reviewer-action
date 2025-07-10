@@ -35,14 +35,14 @@ runs:
     # Step 4: Convert issues.json to suggestions.rdjsonl (RDFormat)
     # https://github.com/reviewdog/reviewdog/tree/master/proto/rdf
     - name: Convert issues to rdjsonl
-      if: success() && test -f issues.json
+      if: success() && hashFiles('issues.json') != ''
       run: python src/generate_rdjsonl.py
       shell: bash
 
-    # Step 6: Post suggestions with reviewdog
+    # Step 5: Post suggestions with reviewdog
     - name: Run reviewdog
       env:
         REVIEWDOG_GITHUB_API_TOKEN: ${{ inputs.github_token }}
-      if: success() && test -f suggestions.rdjsonl
+      if: success() && hashFiles('suggestions.rdjsonl') != ''
       run: reviewdog -f=rdjsonl -name="Grammar reviewer" -reporter=github-pr-review -tee -filter-mode=nofilter < suggestions.rdjsonl
       shell: bash
