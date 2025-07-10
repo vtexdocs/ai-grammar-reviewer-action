@@ -13,4 +13,5 @@ runs:
   env:
     GEMINI_API_KEY: ${{ inputs.gemini_api_key }}
     GITHUB_TOKEN: ${{ inputs.github_token }}
+    REVIEWDOG_GITHUB_API_TOKEN: ${{ inputs.github_token }}
   args: []
