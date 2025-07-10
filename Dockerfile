@@ -9,7 +9,7 @@ RUN apt-get update && \
 
 COPY src/ /github/workspace
 COPY entrypoint.sh /github/workspace
+RUN chmod +x /github/workspace/entrypoint.sh
 WORKDIR /github/workspace
-RUN chmod +x entrypoint.sh
 
 ENTRYPOINT ["/github/workspace/entrypoint.sh"]
