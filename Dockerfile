@@ -7,9 +7,9 @@ RUN apt-get update && \
     apt-get install -y curl && \
     curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b /usr/local/bin
 
-COPY src/ /action
-COPY entrypoint.sh /action
-WORKDIR /action
+COPY src/ /github/workspace
+COPY entrypoint.sh /github/workspace
+WORKDIR /github/workspace
 RUN chmod +x entrypoint.sh
 
-ENTRYPOINT ["/action/entrypoint.sh"]
+ENTRYPOINT ["/github/workspace/entrypoint.sh"]
