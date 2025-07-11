@@ -20,6 +20,8 @@ Inline suggestions appear in the file diffs, so they can be [easily applied](htt
 
 When issues occur outside the scope of the content changed in the PR (diff hunk), inline suggestions cannot be posted due to a [GitHub limitation](https://github.com/microsoft/vscode-pull-request-github/issues/172). Instead, reviewdog post them as comments for the file. The issue line is still indicated in the comment.
 
+![Comment outside diff example](images/comment-outside-diff-example.png)
+
 ## Action usage
 
 To use this action in your GitHub repository, follow these steps:
@@ -52,8 +54,6 @@ To use this action in your GitHub repository, follow these steps:
                 gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
                 github_token: ${{ secrets.GITHUB_TOKEN }}
     ```
-
-![Comment outside diff example](images/comment-outside-diff-example.png)
 
 ## Internal workings
 
