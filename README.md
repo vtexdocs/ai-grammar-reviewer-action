@@ -73,10 +73,12 @@ The action runs from a Dockerfile that calls a shell script. This script has the
 flowchart LR
     A(["Start"]) --> B["Gemini grammar<br/>review"]
     B --issues.json--> C{"File exists?"}
-    B --> J["Post comment with<br/>review summaries<br/>and feedback option"]
-    C --> D["Convert JSON to<br/>RDFormat (rdjsonl)"] & E["Skip script"]
-    D --suggestions.rdjsonl--> F{"File exists?"}
-    E --> F{"File exists?"}
-    F --> G["Reviewdog post<br/>suggestions"] & H["Skip reviewdog"]
-    G & H --> I(["End"])
+    B --> D["Post comment with<br/>summary comment<br/>and feedback option"]
+    C --Yes--> E["Convert JSON to<br/>RDFormat (rdjsonl)"]
+    C --No --> F["Skip script"]
+    E --suggestions.rdjsonl--> G{"File exists?"}
+    F --> G{"File exists?"}
+    G --Yes--> H["Reviewdog post<br/>suggestions"]
+    G --No --> I["Skip reviewdog"]
+    H & I --> J(["End"])
 ```
