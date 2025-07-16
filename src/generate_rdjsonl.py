@@ -19,6 +19,16 @@ def apply_corrections(original_line, original_pieces, corrections):
 
     return corrected_line
 
+def get_utf16_col(line, substring):
+    """Return the 1-based UTF-16 code unit column for the first occurrence of substring in line."""
+    idx = line.find(substring)
+    if idx == -1:
+        return None
+    # Count UTF-16 code units up to idx
+    prefix = line[:idx]
+    utf16_units = len(prefix.encode('utf-16-le')) // 2  # 2 bytes per code unit
+    return utf16_units + 1  # RDFormat columns are 1-based
+
 def make_rdjsonl_diagnostic(filename, issue, original_lines):
     # RDFormat expects 1-based line and column numbers
     line_idx = issue["line"] - 1
@@ -29,13 +39,14 @@ def make_rdjsonl_diagnostic(filename, issue, original_lines):
     else:
         text = issue["text"]
         line = original_lines[line_idx]
-        # Find the first occurrence of the text to be replaced
-        if text in line:
-            start_col = line.find(text) + 1
-        else:
+        col = get_utf16_col(line, text)
+        if col is None:
             print(f"⚠️[warn] Text '{text}' not found in line {issue['line']} of '{filename}'.")
             return {}
-        end_col = start_col + len(text) if start_col > 0 else 1
+        # Calculate end column in UTF-16 code units
+        text_utf16_len = len(text.encode('utf-16-le')) // 2
+        start_col = col
+        end_col = start_col + text_utf16_len
     return {
         "message": issue["explanation"],
         "location": {
