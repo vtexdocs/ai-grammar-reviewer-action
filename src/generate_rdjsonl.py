@@ -11,18 +11,6 @@ def load_issues(path):
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
-def grapheme_len(s):
-    return len(re.findall(r'\X', s))
-
-def get_grapheme_index(line, substring):
-    match = line.find(substring)
-    if match == -1:
-        return -1, -1
-    pre = line[:match]
-    start_col = grapheme_len(pre) + 1
-    end_col = start_col + grapheme_len(substring)
-    return start_col, end_col
-
 def apply_corrections(original_line, original_pieces, corrections):
     corrected_line = original_line
     for orig, corr in zip(original_pieces, corrections):
@@ -42,11 +30,14 @@ def make_rdjsonl_diagnostic(filename, issue, original_lines):
     else:
         text = issue["text"]
         line = original_lines[line_idx]
-
-        start_col, end_col = get_grapheme_index(line, text)
-        if start_col == -1:
+        # Find the first occurrence of the text to be replaced
+        if text in line:
+            # RDFormat counts columns using UTF-8 code points
+            start_col = line.find(text.encode('utf-8')) + 1
+        else:
             print(f"⚠️[warn] Text '{text}' not found in line {issue['line']} of '{filename}'.")
             return {}
+        end_col = start_col + len(text.encode('utf-8')) if start_col > 0 else 1
     return {
         "message": issue["explanation"],
         "location": {
