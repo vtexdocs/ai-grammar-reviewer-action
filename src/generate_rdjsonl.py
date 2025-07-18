@@ -33,7 +33,7 @@ def make_rdjsonl_diagnostic(filename, issue, original_lines):
         # Find the first occurrence of the text to be replaced
         if text in line:
             # RDFormat counts columns using UTF-8 code points
-            start_col = line.find(text.encode('utf-8')) + 1
+            start_col = line.encode('utf-8').find(text.encode('utf-8')) + 1
         else:
             print(f"⚠️[warn] Text '{text}' not found in line {issue['line']} of '{filename}'.")
             return {}
