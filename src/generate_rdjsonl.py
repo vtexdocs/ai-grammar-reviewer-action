@@ -2,7 +2,6 @@ import json
 import sys
 import os
 from pathlib import Path
-import regex as re
 
 ISSUE_FILE = "issues.json"
 RDJSONL_FILE = "suggestions.rdjsonl"
