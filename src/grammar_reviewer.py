@@ -58,8 +58,11 @@ def review_grammar(file_path):
         "required": ["issues", "summary"]
     }
 
+    system_instruction = "You are a grammar assistant specialized in reviewing grammar in technical documentation written in Markdown."
+
     prompt = (
-        "Review the following Markdown for grammar issues. "
+        "Your task is to review only the grammar, spelling, and typographic correctness of the provided Markdown content. "
+        "Do not check for syntax of Markdown, HTML or any programming language. Ignore fenced code blocks. "
         "Each line is prefixed with its line number, in the format `[line_number]: [content]`. For example: `1: This is the first line.` "
         "When reporting issues, use the provided line numbers. "
         "Return a JSON object with an 'issues' array (each with line, text, correction, explanation) and a 'summary' string.\n\n"
@@ -73,7 +76,8 @@ def review_grammar(file_path):
         config={
             "response_mime_type": "application/json",
             "temperature": 0.2,
-            "response_schema": response_schema
+            "response_schema": response_schema,
+            "system_instruction": system_instruction
         }
     )
     try:
