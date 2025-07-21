@@ -67,6 +67,10 @@ The action runs from a Dockerfile that calls a shell script. This script has the
     3. Write the lists of issues in a JSON file (`issues.json`), which will be used for the next python script to post the suggestions.
     4. Aggregate the review summaries and use the GitHub API to post them as a single comment along with the feedback option.
 2. Verify if the `issues.json` file exists. If true, execute a Python script (`generate_rdjsonl.py`) to convert the issues JSON to a format that reviewdog accepts and creates another file (`suggestions.rdjsonl`). It uses [RDFormat with rdjsonl](https://github.com/reviewdog/reviewdog/tree/master/proto/rdf#rdjsonl).
+
+> [!NOTE]
+> The character/column count in RDFormat is different from the traditional byte count, since it uses UTF-8 encoding internally. This difference occurs with emojis and some special characters (e.g., `’`).
+
 3. Verify if the `suggestions.rdjsonl` file exists. If true, execute reviewdog to post suggestions.
 
 ```mermaid
