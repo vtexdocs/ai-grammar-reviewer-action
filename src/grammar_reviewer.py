@@ -61,7 +61,7 @@ def review_grammar(file_path):
     system_instruction = "You are a grammar assistant specialized in reviewing grammar in technical documentation written in Markdown."
 
     prompt = (
-        "Your task is to review only the grammar, spelling, and typographic correctness of the provided Markdown content. "
+        "Your task is to review the grammar, spelling, and typographic correctness of the provided Markdown content. "
         "Do not check for syntax of Markdown, HTML or any programming language. Ignore fenced code blocks. "
         "Each line is prefixed with its line number, in the format `[line_number]: [content]`. For example: `1: This is the first line.` "
         "When reporting issues, use the provided line numbers. "
