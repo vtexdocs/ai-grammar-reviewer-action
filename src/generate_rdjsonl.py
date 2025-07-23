@@ -23,7 +23,7 @@ def make_rdjsonl_diagnostic(filename, issue, original_lines):
     # RDFormat expects 1-based line and column numbers
     line_idx = issue["line"] - 1
     if line_idx < 0 or line_idx >= len(original_lines):
-        # fallback to column 1 if out of range
+        # Fallback to column 1 if out of range
         start_col = 1
         end_col = 1
     else:
@@ -67,6 +67,10 @@ def main():
             print(f"⏩[skip] File '{filename}' not found.")
             continue
         original_lines = Path(filename).read_text(encoding="utf-8").splitlines()
+
+        # Filter out issues where the correction is the same as the original text
+        issues = [issue for issue in issues if issue["text"] != issue["correction"]]
+
         # Aggregate issues by line in a dict, where the key is the line number
         issues_by_line = {}
         for issue in issues:
