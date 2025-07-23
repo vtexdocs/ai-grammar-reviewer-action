@@ -35,7 +35,7 @@ def review_grammar(file_path):
         lines = f.readlines()
 
     # Add line numbers to each line
-    numbered_content = ''.join(f"{i+1}: {line}" for i, line in enumerate(lines))
+    numbered_content = ''.join(f"{i+1}: ¬{line}¬" for i, line in enumerate(lines))
 
     response_schema = {
         "type": "object",
@@ -63,7 +63,7 @@ def review_grammar(file_path):
     prompt = (
         "Your task is to review the grammar, spelling, and typographic correctness of the provided Markdown content. "
         "Do not check for syntax of Markdown, HTML or any programming language. Ignore fenced code blocks. "
-        "Each line is prefixed with its line number, in the format `[line_number]: [content]`. For example: `1: This is the first line.` "
+        "Each line is prefixed with its line number, in the format `[line_number]: ¬[content]¬`. For example: `1: ¬This is the first line.¬` "
         "When reporting issues, use the provided line numbers. "
         "Return a JSON object with an 'issues' array (each with line, text, correction, explanation) and a 'summary' string.\n\n"
         f"{numbered_content}"
