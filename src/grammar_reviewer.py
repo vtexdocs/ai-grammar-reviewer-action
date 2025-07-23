@@ -95,6 +95,8 @@ def post_pr_comment(body):
     pr.create_issue_comment(body)
 
 def main():
+    print("Starting grammar review with Gemini ...")
+
     files = get_changed_md_files()
     if not files:
         print("No Markdown files changed.")
@@ -125,6 +127,9 @@ def main():
     # Write all issues to a single issues.json file
     with open("issues.json", "w", encoding="utf-8") as f:
         json.dump(all_issues, f, indent=2)
+
+    print(" \nIssues found:")
+    print(f"{json.dumps(all_issues, indent=2, ensure_ascii=False)}\n ")
 
     print("✅ Grammar review completed. Issues saved to issues.json.")
 
