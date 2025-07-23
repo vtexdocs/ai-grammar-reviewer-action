@@ -22,6 +22,7 @@ def apply_corrections(original_line, original_pieces, corrections):
 def make_rdjsonl_diagnostic(filename, issue, original_lines):
     # RDFormat expects 1-based line and column numbers
     line_idx = issue["line"] - 1
+    correct_line = issue["line"]
     if line_idx < 0 or line_idx >= len(original_lines):
         # Fallback to column 1 if out of range
         start_col = 1
@@ -35,7 +36,20 @@ def make_rdjsonl_diagnostic(filename, issue, original_lines):
             start_col = line.encode('utf-8').find(text.encode('utf-8')) + 1
         else:
             print(f"⚠️[warn] Text '{text}' not found in line {issue['line']} of '{filename}'.")
-            return {}
+
+            start_col = 0
+            # If the text is not found in the provided line, try to find it in other lines
+            # This is a fallback mechanism to ensure we can still provide a diagnostic
+            for i in original_lines:
+                if text in i:
+                    start_col = i.encode('utf-8').find(text.encode('utf-8')) + 1
+                    correct_line = original_lines.index(i) + 1  # 1-based index
+                    print(f"ℹ️ [info] Using fallback for text '{text}'. Using line {correct_line} instead of {issue['line']} in '{filename}'.")
+                    break
+
+            if not start_col:
+                print(f"⚠️[warn] Text '{text}' not found in any line of '{filename}'.")
+                return {}
         end_col = start_col + len(text.encode('utf-8')) if start_col > 0 else 1
     return {
         "message": issue["explanation"],
@@ -43,15 +57,15 @@ def make_rdjsonl_diagnostic(filename, issue, original_lines):
             # Use absolute path so reviewdog works with RDFormat
             "path": f"{os.path.abspath(filename)}",
             "range": {
-                "start": {"line": issue["line"], "column": start_col},
-                "end": {"line": issue["line"], "column": end_col}
+                "start": {"line": correct_line, "column": start_col},
+                "end": {"line": correct_line, "column": end_col}
             }
         },
         "suggestions": [
             {
                 "range": {
-                    "start": {"line": issue["line"], "column": start_col},
-                    "end": {"line": issue["line"], "column": end_col}
+                    "start": {"line": correct_line, "column": start_col},
+                    "end": {"line": correct_line, "column": end_col}
                 },
                 "text": issue["correction"]
             }
