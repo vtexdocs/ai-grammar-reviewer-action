@@ -35,14 +35,14 @@ def correct_line_issues(issues, original_lines, filename):
             yield issue
             continue
 
-        print(f"⚠️ [warn] Text '{issue["text"]}' not found in line {issue["line"]} of '{filename}'.")
+        print(f"⚠️ [warn] Text '{issue['text']}' not found in line {issue['line']} of '{filename}'.")
 
         line_found = False
         for i_line in original_lines:
             if issue["text"] in i_line:
                 # If the text is found in another line, we can use that line instead
                 corrected_line = original_lines.index(i_line) + 1
-                print(f"ℹ️ [info] Using fallback for text '{issue["text"]}'. Using line {corrected_line} instead of {issue["line"]} in '{filename}'.")
+                print(f"ℹ️ [info] Using fallback for text '{issue['text']}'. Using line {corrected_line} instead of {issue['line']} in '{filename}'.")
                 line_found = True
 
                 yield {
@@ -55,7 +55,7 @@ def correct_line_issues(issues, original_lines, filename):
                 break
 
         if not line_found:
-            print(f"⚠️ [warn] Text '{issue["text"]}' not found in any line of '{filename}'. Skipping issue.")
+            print(f"⚠️ [warn] Text '{issue['text']}' not found in any line of '{filename}'. Skipping issue.")
             continue
 
 def aggregate_issues(corrected_issues, original_lines, filename):
