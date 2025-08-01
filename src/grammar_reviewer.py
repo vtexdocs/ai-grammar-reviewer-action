@@ -114,7 +114,8 @@ def main():
             all_issues[file] = review_json.get("issues", [])
             # Get only the summary to post as a PR comment
             summary = review_json.get("summary", "")
-            if summary:
+            # Add summary if it exists and there are issues
+            if summary and len(all_issues[file]) > 0:
                 summaries.append(f"### Review for `{file}`\n{summary}")
 
 
