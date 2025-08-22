@@ -73,7 +73,11 @@ When the action makes many suggestions, instead of applying suggestions individu
 
 ### Run the reviewer multiple times
 
-The AI model is not perfect. It is common for it to give only part of the suggestions it should on each execution. If the action is configured to run on `synchronize`, it will run for every change on the PR. So, after applying the suggestions, wait for the action to run again, check the new suggestions and apply those you want. Repeat this process as many times as needed.
+The AI model is not perfect. It is common for it to give only part of the suggestions it should on each execution.
+
+If the action is configured to run on `synchronize`, it will run for every change on the PR. So, after applying the suggestions, wait for the action to run again, check the new suggestions and apply those you want. Repeat this process as many times as needed.
+
+You can also [re-run the jobs manually](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/re-run-workflows-and-jobs). You can use this to generate the suggestions again without making any changes to the PR content.
 
 ## Internal workings
 
