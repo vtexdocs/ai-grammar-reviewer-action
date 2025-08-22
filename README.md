@@ -55,6 +55,26 @@ To use this action in your GitHub repository, follow these steps:
                 github_token: ${{ secrets.GITHUB_TOKEN }}
     ```
 
+## Review tips
+
+Here are some tips to improve the review process with this action.
+
+### Apply suggestions in batch
+
+When the action makes many suggestions, instead of applying suggestions individually, add them to a batch and make a single commit. To do this, follow these steps:
+
+1. Click on the **Files changed** tab in your PR.
+2. On each suggestion you want to apply, click on **Add suggestion to batch**.
+3. Click **Commit suggestions** at the top of the page.
+4. In the two text boxes, edit the commit name and description if you want.
+5. Click **Commit changes**.
+
+![Commit suggestions in batch](./images/batch-commit.gif)
+
+### Run the reviewer multiple times
+
+The AI model is not perfect. It is common for it to give only part of the suggestions it should on each execution. If the action is configured to run on `synchronize`, it will run for every change on the PR. So, after applying the suggestions, wait for the action to run again, check the new suggestions and apply those you want. Repeat this process as many times as needed.
+
 ## Internal workings
 
 The action runs from a Dockerfile that calls a shell script. This script has the following steps:
