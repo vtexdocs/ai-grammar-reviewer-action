@@ -103,6 +103,8 @@ def main():
         return
     all_issues = {}
     summaries = []
+    total_issues = 0 
+
     for file in files:
         if os.path.exists(file):
             review = review_grammar(file)
@@ -110,29 +112,32 @@ def main():
                 review_json = json.loads(review)
             except Exception:
                 continue
+            issues = review_json.get("issues", []) or []
             # Collect issues for this file
-            all_issues[file] = review_json.get("issues", [])
+            all_issues[file] = issues
+            total_issues += len(issues)
             # Get only the summary to post as a PR comment
             summary = review_json.get("summary", "")
             # Add summary if it exists and there are issues
-            if summary and len(all_issues[file]) > 0:
+            if summary and len(issues) > 0:
                 summaries.append(f"### Review for `{file}`\n{summary}")
-
-
-    # Post one comment with all summaries and feedback
-    if summaries:
-        feedback = "\n\n<hr><h2 id=\"ai-feedback\">Was this feedback useful?</h2>\n\n- [ ] Yes\n- [ ] No"
-        full_comment = "## Grammar review summary\n\n" + "\n\n".join(summaries) + feedback
-        post_pr_comment(full_comment)
 
     # Write all issues to a single issues.json file
     with open("issues.json", "w", encoding="utf-8") as f:
         json.dump(all_issues, f, indent=2)
 
     print(" \nIssues found:")
-    print(f"{json.dumps(all_issues, indent=2, ensure_ascii=False)}\n ")
+    print(f"{json.dumps(all_issues, indent=2)}\n ")
 
-    print("✅ Grammar review completed. Issues saved to issues.json.")
+    # Post one comment with all summaries and feedback
+    if total_issues > 0:
+        feedback = "\n\n<hr><h2 id=\"ai-feedback\">Was this feedback useful?</h2>\n\n- [ ] Yes\n- [ ] No"
+        full_comment = "## Grammar review summary\n\n" + "\n\n".join(summaries) + feedback
+        post_pr_comment(full_comment)
+        print("✅ Grammar review completed. Issues saved to issues.json and PR commented.")
+    else:
+        print("✅ No issues found.")
+
 
 if __name__ == "__main__":
     main()
