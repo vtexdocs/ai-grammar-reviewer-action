@@ -58,11 +58,12 @@ def review_grammar(file_path):
         "required": ["issues", "summary"]
     }
 
-    system_instruction = "You are a grammar assistant specialized in reviewing grammar in technical documentation written in Markdown."
+    system_instruction = "You are a grammar assistant. Correct only grammar, spelling, and typographic errors in Markdown text. Never give stylistic, tonal, or rephrasing suggestions."
 
     prompt = (
-        "Your task is to review the grammar, spelling, and typographic correctness of the provided Markdown content. "
-        "Do not check for syntax of Markdown, HTML or any programming language. Ignore fenced code blocks. "
+        "Your task is to review ONLY grammar, spelling, and typographic correctness of the provided Markdown content. "
+        "Ignore fenced code blocks. Do not check for syntax of Markdown, HTML, or any programming language."
+        "Do NOT provide stylistic edits, rewording, tone changes, clarity improvements, or suggestions that alter the author's writing style."
         "Each line is prefixed with its line number, in the format `[line_number]: ¬[content]¬`. For example: `1: ¬This is the first line.¬`. "
         "When reporting issues, use the provided line numbers. "
         "Return a JSON object with an 'issues' array (each with line, text, correction, explanation) and a 'summary' string.\n\n"
