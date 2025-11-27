@@ -107,7 +107,14 @@ def post_pr_comment(body):
     if existing_comment:
         # Atualiza o comentário existente
         print("Updating existing grammar review comment...")
-        existing_comment.edit(body)
+        timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
+        updated_body = (
+            body
+            + f"\n\n*Edited on {timestamp}*"
+        )
+    
+        existing_comment.edit(updated_body)
     else:
         # Cria um comentário novo (primeira execução)
         print("Creating new grammar review comment...")
@@ -139,7 +146,7 @@ def main():
             summary = review_json.get("summary", "")
             # Add summary if it exists and there are issues
             if summary and len(issues) > 0:
-                summaries.append(f"### Review for `{file}`\n{summary}")
+                summaries.append(f"#### `{file}`\n{summary}")
 
     # Write all issues to a single issues.json file
     with open("issues.json", "w", encoding="utf-8") as f:
