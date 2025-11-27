@@ -3,6 +3,7 @@ import json
 import requests
 from github import Github
 from google import genai
+from datetime import datetime, timezone
 
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN')
