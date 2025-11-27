@@ -93,7 +93,25 @@ def post_pr_comment(body):
     g = Github(GITHUB_TOKEN)
     repo = g.get_repo(repo_name)
     pr = repo.get_pull(pr_number)
-    pr.create_issue_comment(body)
+
+    # Marcador fixo para identificar o comentário de review de gramática
+    marker = "<!-- ai-grammar-review-comment -->"
+
+    existing_comment = None
+
+    # Procura entre os comentários de issue do PR (não review comments de linha)
+    for comment in pr.get_issue_comments():
+        if marker in comment.body:
+            existing_comment = comment
+            break
+    if existing_comment:
+        # Atualiza o comentário existente
+        print("Updating existing grammar review comment...")
+        existing_comment.edit(body)
+    else:
+        # Cria um comentário novo (primeira execução)
+        print("Creating new grammar review comment...")
+        pr.create_issue_comment(body)
 
 def main():
     print("Starting grammar review with Gemini ...")
@@ -132,8 +150,8 @@ def main():
 
     # Post one comment with all summaries and feedback
     if total_issues > 0:
-        feedback = "\n\n<hr><h2 id=\"ai-feedback\">Was this feedback useful?</h2>\n\n- [ ] Yes\n- [ ] No"
-        full_comment = "## Grammar review summary\n\n" + "\n\n".join(summaries) + feedback
+        feedback = "\n\n<hr><h3 id=\"ai-feedback\">Was this feedback useful?</h3>\n\n- [ ] Yes\n- [ ] No"
+        full_comment = "<!-- ai-grammar-review-comment -->\n### ✏️ Grammar review summary\n\n" + "\n\n".join(summaries) + feedback
         post_pr_comment(full_comment)
         print("✅ Grammar review completed. Issues saved to issues.json and PR commented.")
     else:
