@@ -73,7 +73,7 @@ def review_grammar(file_path):
 
     client = genai.Client(api_key=GEMINI_API_KEY)
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model="gemini-3-flash-preview",
         contents=prompt,
         config={
             "response_mime_type": "application/json",
@@ -114,7 +114,7 @@ def post_pr_comment(body):
             body
             + f"\n\n*Edited on {timestamp}*"
         )
-    
+
         existing_comment.edit(updated_body)
     else:
         # Cria um comentário novo (primeira execução)
@@ -130,7 +130,7 @@ def main():
         return
     all_issues = {}
     summaries = []
-    total_issues = 0 
+    total_issues = 0
 
     for file in files:
         if os.path.exists(file):
