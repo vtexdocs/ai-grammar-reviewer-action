@@ -1,4 +1,4 @@
-name: Update major version tag
+name: Update major version tag/release
 
 on:
   push:
@@ -42,3 +42,31 @@ jobs:
         with:
           major_version_tag_only: true
           tag: ${{ github.ref_name }}
+
+      - name: Update major release description
+        if: steps.get_release.outputs.is_stable == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = context.ref.replace('refs/tags/', '');
+            const majorTag = tag.split('.')[0];
+            try {
+              const { data: release } = await octokit.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag: majorTag,
+              });
+              const newBody = `Major ${majorTag}. Keeps updated to the latest version in this major (${tag}).`;
+              await octokit.rest.repos.updateRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: release.id,
+                body: newBody,
+              });
+            } catch (err) {
+              if (err.status === 404) {
+                console.log(`No release found for major tag ${majorTag}, skipping description update`);
+              } else {
+                throw err;
+              }
+            }
