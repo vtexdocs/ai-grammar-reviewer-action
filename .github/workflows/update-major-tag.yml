@@ -1,0 +1,44 @@
+name: Update major version tag
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  update-major-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get release and set is_stable
+        id: get_release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = context.ref.replace('refs/tags/', '');
+            try {
+              const { data: release } = await octokit.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag,
+              });
+              core.setOutput('is_stable', release.prerelease === false ? 'true' : 'false');
+            } catch (err) {
+              if (err.status === 404) {
+                core.setOutput('is_stable', 'false');
+              } else {
+                throw err;
+              }
+            }
+
+      - name: Update major tag
+        if: steps.get_release.outputs.is_stable == 'true'
+        uses: haya14busa/action-update-semver@v1
+        with:
+          major_version_tag_only: true
+          tag: ${{ github.ref_name }}
