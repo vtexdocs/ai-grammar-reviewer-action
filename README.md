@@ -8,7 +8,7 @@ This action executes a series of steps to read the Markdown files, use Google Ge
 
 ### Summary comment
 
-The summary comment is a single comment in the PR formatted in Markdown and HTML including a summary of the review for each file reviewed. It also has a feedback option, which is collected by another action.
+The summary comment is a single comment in the PR formatted in Markdown and HTML including a summary of the review for each file reviewed. It also has a feedback option, which is collected by [another action](https://github.com/vtexdocs/dev-portal-content/blob/main/.github/workflows/get_feedback_on_ai_reviewer.yml).
 
 ![Summary comment example](./images/summary-comment-example.png)
 
@@ -55,7 +55,7 @@ To use this action in your GitHub repository, follow these steps:
                 github_token: ${{ secrets.GITHUB_TOKEN }}
     ```
 
-    The `folders` input is optional. When omitted, only changed files under `docs/` are reviewed. To restrict or extend which paths are reviewed, pass `folders` as a newline- or comma-separated list of folder prefixes (e.g. `docs`, `docs/guides`, `docs/release-notes`):
+    The `folders` input is optional. When omitted, only changed files under `docs/` are reviewed. To choose which paths are reviewed, pass `folders` as a newline- or comma-separated list of folder prefixes (e.g. `docs`, `docs/guides`, `docs/release-notes`"):
 
     ```yml
             - uses: vtexdocs/ai-grammar-reviewer-action@v0
