@@ -32,6 +32,7 @@ def _parse_folders_to_review():
 # Find changed markdown files
 def get_changed_md_files():
     valid_folders = _parse_folders_to_review()
+    print("Folders to review:", list(valid_folders))
 
     files = []
     if 'pull_request' in event:
@@ -98,9 +99,9 @@ def review_grammar(file_path):
             config=config
         )
         try:
-            response = future.result(timeout=90)
+            response = future.result(timeout=30)
         except concurrent.futures.TimeoutError:
-            print("gemini-3-flash-preview timed out (>90s), retrying with gemini-2.5-flash ...")
+            print("gemini-3-flash-preview timed out (>30s), retrying with gemini-2.5-flash ...")
             response = client.models.generate_content(
                 model="gemini-2.5-flash",
                 contents=prompt,
@@ -147,8 +148,6 @@ def post_pr_comment(body):
 
 def main():
     print("Starting grammar review with Gemini ...")
-    valid_folders = _parse_folders_to_review()
-    print("Folders to review:", list(valid_folders))
 
     files = get_changed_md_files()
     if not files:
