@@ -64,7 +64,7 @@ jobs:
           ref: ${{ steps.highest.outputs.tag }}
       - name: Update major version tags
         if: steps.highest.outputs.is_highest == 'true'
-      - uses: haya14busa/action-update-semver@v1
+        uses: haya14busa/action-update-semver@v1
         with:
           tag: ${{ steps.highest.outputs.tag }}
           major_version_tag_only: true
