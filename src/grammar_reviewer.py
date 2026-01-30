@@ -1,7 +1,7 @@
 import os
 import json
 import requests
-from github import Github
+from github import Auth, Github
 from google import genai
 from datetime import datetime, timezone
 
@@ -103,7 +103,7 @@ def post_pr_comment(body):
     if not (GITHUB_TOKEN and repo_name and pr_number):
         print("Missing GitHub context for commenting.")
         return
-    g = Github(GITHUB_TOKEN)
+    g = Github(auth=Auth.Token(GITHUB_TOKEN))
     repo = g.get_repo(repo_name)
     pr = repo.get_pull(pr_number)
 
