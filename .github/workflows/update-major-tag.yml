@@ -1,62 +1,90 @@
 name: Update major version tag/release
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
+  release:
+    types: [published]
 
 permissions:
   contents: write
 
 jobs:
   update-major-tag:
+    if: github.event.release.prerelease == false
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Get release and set is_stable
-        id: get_release
+      - name: Resolve highest version for major
+        id: highest
         uses: actions/github-script@v7
         with:
           script: |
-            const tag = context.ref.replace('refs/tags/', '');
-            try {
-              const { data: release } = await octokit.rest.repos.getReleaseByTag({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                tag,
+            const tag = context.payload.release.tag_name;
+            const majorTag = tag.split('.')[0];
+            const majorNum = parseInt(majorTag.replace(/^v/, ''), 10);
+
+            const { data: releases } = await octokit.rest.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100,
+            });
+
+            const inMajor = releases
+              .filter(r => !r.draft && !r.prerelease)
+              .map(r => r.tag_name)
+              .filter(t => {
+                const match = t.match(/^v?(\d+)\.(\d+)\.(\d+)(?:-|$)/);
+                return match && parseInt(match[1], 10) === majorNum;
               });
-              core.setOutput('is_stable', release.prerelease === false ? 'true' : 'false');
-            } catch (err) {
-              if (err.status === 404) {
-                core.setOutput('is_stable', 'false');
-              } else {
-                throw err;
-              }
+
+            if (inMajor.length === 0) {
+              core.setOutput('tag', tag);
+              core.setOutput('major_tag', majorTag);
+              core.setOutput('is_highest', 'true');
+              return;
             }
 
-      - name: Update major tag
-        if: steps.get_release.outputs.is_stable == 'true'
-        uses: haya14busa/action-update-semver@v1
-        with:
-          major_version_tag_only: true
-          tag: ${{ github.ref_name }}
+            const parsed = inMajor.map(t => {
+              const m = t.match(/^v?(\d+)\.(\d+)\.(\d+)/);
+              return { tag: t, parts: [parseInt(m[1],10), parseInt(m[2],10), parseInt(m[3],10)] };
+            });
+            parsed.sort((a, b) => {
+              if (a.parts[0] !== b.parts[0]) return b.parts[0] - a.parts[0];
+              if (a.parts[1] !== b.parts[1]) return b.parts[1] - a.parts[1];
+              return b.parts[2] - a.parts[2];
+            });
 
+            const highestTag = parsed[0].tag;
+            core.setOutput('tag', highestTag);
+            core.setOutput('major_tag', majorTag);
+            core.setOutput('is_highest', tag === highestTag ? 'true' : 'false');
+      - name: Check out code
+        if: steps.highest.outputs.is_highest == 'true'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ steps.highest.outputs.tag }}
+      - name: Update major version tags
+        if: steps.highest.outputs.is_highest == 'true'
+      - uses: haya14busa/action-update-semver@v1
+        with:
+          tag: ${{ steps.highest.outputs.tag }}
+          major_version_tag_only: true
       - name: Update major release description
-        if: steps.get_release.outputs.is_stable == 'true'
+        if: steps.highest.outputs.is_highest == 'true'
         uses: actions/github-script@v7
+        env:
+          HIGHEST_TAG: ${{ steps.highest.outputs.tag }}
+          MAJOR_TAG: ${{ steps.highest.outputs.major_tag }}
         with:
           script: |
-            const tag = context.ref.replace('refs/tags/', '');
-            const majorTag = tag.split('.')[0];
+            const tag = process.env.HIGHEST_TAG;
+            const majorTag = process.env.MAJOR_TAG;
+            const newBody = `Major ${majorTag}. Keeps updated to the latest version in this major (${tag}).`;
             try {
               const { data: release } = await octokit.rest.repos.getReleaseByTag({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 tag: majorTag,
               });
-              const newBody = `Major ${majorTag}. Keeps updated to the latest version in this major (${tag}).`;
               await octokit.rest.repos.updateRelease({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -65,7 +93,13 @@ jobs:
               });
             } catch (err) {
               if (err.status === 404) {
-                console.log(`No release found for major tag ${majorTag}, skipping description update`);
+                await octokit.rest.repos.createRelease({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  tag_name: majorTag,
+                  name: majorTag,
+                  body: newBody,
+                });
               } else {
                 throw err;
               }
