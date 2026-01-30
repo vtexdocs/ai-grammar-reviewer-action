@@ -7,6 +7,10 @@ inputs:
   github_token:
     description: 'GitHub Token'
     required: true
+  folders:
+    description: 'Folder prefixes to review (newline- or comma-separated). Only changed files under these paths are reviewed.'
+    required: false
+    default: 'docs'
 runs:
   using: 'docker'
   image: 'Dockerfile'
@@ -14,4 +18,5 @@ runs:
     GEMINI_API_KEY: ${{ inputs.gemini_api_key }}
     GITHUB_TOKEN: ${{ inputs.github_token }}
     REVIEWDOG_GITHUB_API_TOKEN: ${{ inputs.github_token }}
+    FOLDERS_TO_REVIEW: ${{ inputs.folders }}
   args: []

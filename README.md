@@ -55,6 +55,18 @@ To use this action in your GitHub repository, follow these steps:
                 github_token: ${{ secrets.GITHUB_TOKEN }}
     ```
 
+    The `folders` input is optional. When omitted, only changed files under `docs/` are reviewed. To restrict or extend which paths are reviewed, pass `folders` as a newline- or comma-separated list of folder prefixes (e.g. `docs`, `docs/guides`, `docs/release-notes`):
+
+    ```yml
+            - uses: vtexdocs/ai-grammar-reviewer-action@v0
+              with:
+                gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+                github_token: ${{ secrets.GITHUB_TOKEN }}
+                folders: |
+                  docs/guides
+                  docs/release-notes
+    ```
+
 ## Review tips
 
 Here are some tips to improve the review process with this action.

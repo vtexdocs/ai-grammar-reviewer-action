@@ -1,7 +1,7 @@
 import os
 import json
 import requests
-from github import Github
+from github import Auth, Github
 from google import genai
 from datetime import datetime, timezone
 
@@ -17,9 +17,21 @@ if GITHUB_EVENT_PATH and os.path.exists(GITHUB_EVENT_PATH):
 pr_number = event.get('pull_request', {}).get('number')
 repo_name = event.get('repository', {}).get('full_name')
 
+def _parse_folders_to_review():
+    raw = os.environ.get('FOLDERS_TO_REVIEW', 'docs').strip()
+    folders = []
+    for line in raw.splitlines():
+        for part in line.split(','):
+            folder = part.strip()
+            if folder:
+                folders.append(folder)
+    return tuple(folders) if folders else ('docs',)
+
+
 # Find changed markdown files
 def get_changed_md_files():
-    valid_folders = ('docs/guides', 'docs/troubleshooting', 'docs/faststore', 'docs/release-notes')
+    valid_folders = _parse_folders_to_review()
+    print("Folders to review:", list(valid_folders))
 
     files = []
     if 'pull_request' in event:
@@ -73,7 +85,7 @@ def review_grammar(file_path):
 
     client = genai.Client(api_key=GEMINI_API_KEY)
     response = client.models.generate_content(
-        model="gemini-3-flash-preview",
+        model="gemini-2.5-flash",
         contents=prompt,
         config={
             "response_mime_type": "application/json",
@@ -91,7 +103,7 @@ def post_pr_comment(body):
     if not (GITHUB_TOKEN and repo_name and pr_number):
         print("Missing GitHub context for commenting.")
         return
-    g = Github(GITHUB_TOKEN)
+    g = Github(auth=Auth.Token(GITHUB_TOKEN))
     repo = g.get_repo(repo_name)
     pr = repo.get_pull(pr_number)
 
