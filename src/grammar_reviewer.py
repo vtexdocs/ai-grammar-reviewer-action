@@ -1,5 +1,6 @@
 import os
 import json
+import concurrent.futures
 import requests
 from github import Github
 from google import genai
@@ -83,16 +84,28 @@ def review_grammar(file_path):
     )
 
     client = genai.Client(api_key=GEMINI_API_KEY)
-    response = client.models.generate_content(
-        model="gemini-3-flash-preview",
-        contents=prompt,
-        config={
-            "response_mime_type": "application/json",
-            "temperature": 0.2,
-            "response_schema": response_schema,
-            "system_instruction": system_instruction
-        }
-    )
+    config = {
+        "response_mime_type": "application/json",
+        "temperature": 0.2,
+        "response_schema": response_schema,
+        "system_instruction": system_instruction
+    }
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(
+            client.models.generate_content,
+            model="gemini-3-flash-preview",
+            contents=prompt,
+            config=config
+        )
+        try:
+            response = future.result(timeout=90)
+        except concurrent.futures.TimeoutError:
+            print("gemini-3-flash-preview timed out (>90s), retrying with gemini-2.5-flash ...")
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt,
+                config=config
+            )
     try:
         return response.text
     except Exception:
@@ -134,6 +147,8 @@ def post_pr_comment(body):
 
 def main():
     print("Starting grammar review with Gemini ...")
+    valid_folders = _parse_folders_to_review()
+    print("Folders to review:", list(valid_folders))
 
     files = get_changed_md_files()
     if not files:
