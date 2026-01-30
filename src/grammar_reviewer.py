@@ -1,6 +1,5 @@
 import os
 import json
-import concurrent.futures
 import requests
 from github import Github
 from google import genai
@@ -85,28 +84,16 @@ def review_grammar(file_path):
     )
 
     client = genai.Client(api_key=GEMINI_API_KEY)
-    config = {
-        "response_mime_type": "application/json",
-        "temperature": 0.2,
-        "response_schema": response_schema,
-        "system_instruction": system_instruction
-    }
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-        future = executor.submit(
-            client.models.generate_content,
-            model="gemini-3-flash-preview",
-            contents=prompt,
-            config=config
-        )
-        try:
-            response = future.result(timeout=30)
-        except concurrent.futures.TimeoutError:
-            print("gemini-3-flash-preview timed out (>30s), retrying with gemini-2.5-flash ...")
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt,
-                config=config
-            )
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config={
+            "response_mime_type": "application/json",
+            "temperature": 0.2,
+            "response_schema": response_schema,
+            "system_instruction": system_instruction
+        }
+    )
     try:
         return response.text
     except Exception:
