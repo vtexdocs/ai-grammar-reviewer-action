@@ -17,9 +17,20 @@ if GITHUB_EVENT_PATH and os.path.exists(GITHUB_EVENT_PATH):
 pr_number = event.get('pull_request', {}).get('number')
 repo_name = event.get('repository', {}).get('full_name')
 
+def _parse_folders_to_review():
+    raw = os.environ.get('FOLDERS_TO_REVIEW', 'docs').strip()
+    folders = []
+    for line in raw.splitlines():
+        for part in line.split(','):
+            folder = part.strip()
+            if folder:
+                folders.append(folder)
+    return tuple(folders) if folders else ('docs',)
+
+
 # Find changed markdown files
 def get_changed_md_files():
-    valid_folders = ('docs/guides', 'docs/troubleshooting', 'docs/faststore', 'docs/release-notes')
+    valid_folders = _parse_folders_to_review()
 
     files = []
     if 'pull_request' in event:
