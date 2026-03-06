@@ -16,6 +16,8 @@ if GITHUB_EVENT_PATH and os.path.exists(GITHUB_EVENT_PATH):
         event = json.load(f)
 pr_number = event.get('pull_request', {}).get('number')
 repo_name = event.get('repository', {}).get('full_name')
+print(f"Repo name: {repo_name}")
+print(f"PR number: {pr_number}")
 
 def _parse_folders_to_review():
     raw = os.environ.get('FOLDERS_TO_REVIEW', 'docs').strip()
@@ -137,6 +139,7 @@ def main():
     print("Starting grammar review with Gemini ...")
 
     files = get_changed_md_files()
+    print(f"Files to be reviewed: {files}")
     if not files:
         print("No Markdown files changed.")
         return
