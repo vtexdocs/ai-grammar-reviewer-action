@@ -10,7 +10,10 @@ else
 fi
 if [ -f suggestions.rdjsonl ]; then
   if [ -n "$PR_NUMBER" ] && [ -n "$GITHUB_REPOSITORY" ]; then
-    export CI_PULL_REQUEST="https://github.com/$GITHUB_REPOSITORY/pull/$PR_NUMBER"
+    export CI_PULL_REQUEST="$PR_NUMBER"
+    export CI_REPO_OWNER="${GITHUB_REPOSITORY%%/*}"
+    export CI_REPO_NAME="${GITHUB_REPOSITORY##*/}"
+    export CI_COMMIT="${GITHUB_SHA}"
   fi
   reviewdog -f=rdjsonl -name="Grammar reviewer" -reporter=github-pr-review -filter-mode=nofilter < suggestions.rdjsonl
 else
