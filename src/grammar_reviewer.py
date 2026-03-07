@@ -8,14 +8,25 @@ from datetime import datetime, timezone
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN')
 GITHUB_EVENT_PATH = os.environ.get('GITHUB_EVENT_PATH')
+GITHUB_REPOSITORY = os.environ.get('GITHUB_REPOSITORY')
+INPUT_PR_NUMBER = os.environ.get('PR_NUMBER') or os.environ.get('INPUT_PR_NUMBER')
 
 # Load PR info
 event = {}
 if GITHUB_EVENT_PATH and os.path.exists(GITHUB_EVENT_PATH):
     with open(GITHUB_EVENT_PATH, 'r') as f:
         event = json.load(f)
-pr_number = event.get('pull_request', {}).get('number')
-repo_name = event.get('repository', {}).get('full_name')
+
+
+def _parse_pr_number(value):
+    try:
+        return int(str(value).strip())
+    except (TypeError, ValueError):
+        return None
+
+
+pr_number = _parse_pr_number(event.get('pull_request', {}).get('number')) or _parse_pr_number(INPUT_PR_NUMBER)
+repo_name = event.get('repository', {}).get('full_name') or GITHUB_REPOSITORY
 print(f"Repo name: {repo_name}")
 print(f"PR number: {pr_number}")
 
@@ -36,13 +47,24 @@ def get_changed_md_files():
     print("Folders to review:", list(valid_folders))
 
     files = []
-    if 'pull_request' in event:
-        files_url = event['pull_request']['url'] + '/files'
-        headers = {'Authorization': f'token {GITHUB_TOKEN}'}
-        resp = requests.get(files_url, headers=headers)
+    if not (GITHUB_TOKEN and repo_name and pr_number):
+        print("Missing context to list changed PR files.")
+        return files
+
+    files_url = f"https://api.github.com/repos/{repo_name}/pulls/{pr_number}/files"
+    headers = {'Authorization': f'token {GITHUB_TOKEN}'}
+
+    while files_url:
+        resp = requests.get(files_url, headers=headers, timeout=20)
+        if resp.status_code != 200:
+            print(f"Failed to fetch PR files ({resp.status_code}): {resp.text}")
+            return files
+
         for file in resp.json():
-            if file['filename'].endswith(('.md','.mdx')) and file['filename'].startswith(valid_folders):
+            if file['filename'].endswith(('.md', '.mdx')) and file['filename'].startswith(valid_folders):
                 files.append(file['filename'])
+
+        files_url = resp.links.get('next', {}).get('url')
     return files
 
 def review_grammar(file_path):
@@ -137,6 +159,12 @@ def post_pr_comment(body):
 
 def main():
     print("Starting grammar review with Gemini ...")
+    if not pr_number:
+        print("No pull request context found. Skipping grammar review.")
+        return
+    if not repo_name:
+        print("No repository context found. Skipping grammar review.")
+        return
 
     files = get_changed_md_files()
     print(f"Files to be reviewed: {files}")

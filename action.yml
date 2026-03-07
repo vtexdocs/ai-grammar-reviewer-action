@@ -11,6 +11,9 @@ inputs:
     description: 'Folder prefixes to review (newline- or comma-separated). Only changed files under these paths are reviewed.'
     required: false
     default: 'docs'
+  pr_number:
+    description: 'Optional pull request number. Required for workflow_dispatch runs that are not on a pull_request event.'
+    required: false
 runs:
   using: 'docker'
   image: 'Dockerfile'
@@ -19,4 +22,5 @@ runs:
     GITHUB_TOKEN: ${{ inputs.github_token }}
     REVIEWDOG_GITHUB_API_TOKEN: ${{ inputs.github_token }}
     FOLDERS_TO_REVIEW: ${{ inputs.folders }}
+    PR_NUMBER: ${{ inputs.pr_number }}
   args: []

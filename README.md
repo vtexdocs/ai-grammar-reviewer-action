@@ -67,6 +67,31 @@ To use this action in your GitHub repository, follow these steps:
                   docs/release-notes
     ```
 
+    This action also supports `workflow_dispatch`. For dispatch runs, pass the `pr_number` input if the workflow is not triggered by `pull_request`:
+
+    ```yml
+      on:
+        workflow_dispatch:
+          inputs:
+            pr_number:
+              description: 'Pull request number to review'
+              required: true
+              type: string
+
+      jobs:
+        grammar-review:
+          runs-on: ubuntu-latest
+          steps:
+            - uses: actions/checkout@v4
+            - uses: vtexdocs/ai-grammar-reviewer-action@v0
+              with:
+                gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+                github_token: ${{ secrets.GITHUB_TOKEN }}
+                pr_number: ${{ inputs.pr_number }}
+    ```
+
+    If no PR context is available (neither a `pull_request` event nor `pr_number`), the action skips the review.
+
 ## Review tips
 
 Here are some tips to improve the review process with this action.
@@ -102,7 +127,7 @@ The action runs from a Dockerfile that calls a shell script. This script has the
         - A string with the summary of the file review.
     3. Write the lists of issues in a JSON file (`issues.json`), which will be used for the next python script to post the suggestions.
     4. Aggregate the review summaries and use the GitHub API to post them as a single comment along with the feedback option.
-2. Verify if the `issues.json` file exists. If true, execute a Python script (`generate_rdjsonl.py`) to convert the issues JSON to a format that reviewdog accepts and creates another file (`suggestions.rdjsonl`). It uses [RDFormat with rdjsonl](https://github.com/reviewdog/reviewdog/tree/master/proto/rdf#rdjsonl). This script applies the following changes in the issues list before converting to RDFormat:
+1. Verify if the `issues.json` file exists. If true, execute a Python script (`generate_rdjsonl.py`) to convert the issues JSON to a format that reviewdog accepts and creates another file (`suggestions.rdjsonl`). It uses [RDFormat with rdjsonl](https://github.com/reviewdog/reviewdog/tree/master/proto/rdf#rdjsonl). This script applies the following changes in the issues list before converting to RDFormat:
     - Remove issues where the corrected text is equal to the original.
     - If the original text is not found in the provided line number, try to find it in another line and update the line number. If it still isn't found, remove the issue.
     - Aggregate issues in the same line into a single issue. When there are multiple issues in the same line, the explanation is posted as an unordered list.
@@ -110,7 +135,7 @@ The action runs from a Dockerfile that calls a shell script. This script has the
 > [!NOTE]
 > The character/column count in RDFormat is different from the traditional byte count, since it uses UTF-8 encoding internally. This difference occurs with emojis and some special characters (e.g., `’`).
 
-3. Verify if the `suggestions.rdjsonl` file exists. If true, execute reviewdog to post suggestions.
+1. Verify if the `suggestions.rdjsonl` file exists. If true, execute reviewdog to post suggestions.
 
 ```mermaid
 flowchart LR
