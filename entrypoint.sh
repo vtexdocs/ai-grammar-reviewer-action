@@ -14,6 +14,8 @@ if [ -f suggestions.rdjsonl ]; then
     BASE_REF="${PR_BASE_REF:-main}"
     HEAD_SHA="${PR_HEAD_SHA:-$GITHUB_SHA}"
     EVENT_FILE="/tmp/pull_request_event.json"
+    REPO_OWNER="${GITHUB_REPOSITORY%%/*}"
+    REPO_NAME="${GITHUB_REPOSITORY#*/}"
     cat > "$EVENT_FILE" << EOF
 {
 "pull_request": {
