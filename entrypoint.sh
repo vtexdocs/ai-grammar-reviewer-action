@@ -21,7 +21,13 @@ if [ -f suggestions.rdjsonl ]; then
   "head": {"ref": "$HEAD_REF", "sha": "$HEAD_SHA"},
   "base": {"ref": "$BASE_REF"}
 },
-"repository": {"full_name": "$GITHUB_REPOSITORY"}
+"repository": {
+  "name": "$REPO_NAME",
+  "full_name": "$GITHUB_REPOSITORY",
+  "owner": {
+    "login": "$REPO_OWNER"
+  }
+}
 }
 EOF
     export GITHUB_EVENT_PATH="$EVENT_FILE"
