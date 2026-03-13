@@ -23,6 +23,9 @@ inputs:
   head_sha:
     description: 'PR head commit SHA. Optional; used so reviewdog posts against the correct commit.'
     required: false
+  repository:
+    description: 'Repository in owner/repo form (e.g. octocat/my-repo). Required when pr_number is set so reviewdog can call the GitHub API.'
+    required: false
 runs:
   using: 'docker'
   image: 'Dockerfile'
@@ -30,7 +33,7 @@ runs:
     GEMINI_API_KEY: ${{ inputs.gemini_api_key }}
     GITHUB_TOKEN: ${{ inputs.github_token }}
     REVIEWDOG_GITHUB_API_TOKEN: ${{ inputs.github_token }}
-    GITHUB_REPOSITORY: ${{ github.repository }}
+    GITHUB_REPOSITORY: ${{ inputs.repository || github.repository }}
     GITHUB_SHA: ${{ github.sha }}
     FOLDERS_TO_REVIEW: ${{ inputs.folders }}
     PR_NUMBER: ${{ inputs.pr_number }}
