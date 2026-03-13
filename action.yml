@@ -12,7 +12,16 @@ inputs:
     required: false
     default: 'docs'
   pr_number:
-    description: 'Optional pull request number. Required for workflow_dispatch runs that are not on a pull_request event.'
+    description: 'Optional pull request number. Required for workflow_dispatch or issue_comment runs that are not on a pull_request event.'
+    required: false
+  head_ref:
+    description: 'PR head branch (e.g. feature-branch). Required for reviewdog when pr_number is set.'
+    required: false
+  base_ref:
+    description: 'PR base branch (e.g. main). Required for reviewdog when pr_number is set.'
+    required: false
+  head_sha:
+    description: 'PR head commit SHA. Optional; used so reviewdog posts against the correct commit.'
     required: false
 runs:
   using: 'docker'
@@ -23,4 +32,8 @@ runs:
     REVIEWDOG_GITHUB_API_TOKEN: ${{ inputs.github_token }}
     FOLDERS_TO_REVIEW: ${{ inputs.folders }}
     PR_NUMBER: ${{ inputs.pr_number }}
+    PR_HEAD_REF: ${{ inputs.head_ref }}
+    PR_BASE_REF: ${{ inputs.base_ref }}
+    PR_HEAD_SHA: ${{ inputs.head_sha }}
+    GITHUB_EVENT_NAME: ${{ inputs.pr_number != '' && 'pull_request' || '' }}
   args: []
