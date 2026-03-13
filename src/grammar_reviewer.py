@@ -108,20 +108,27 @@ def review_grammar(file_path):
     )
 
     client = genai.Client(api_key=GEMINI_API_KEY)
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt,
-        config={
-            "response_mime_type": "application/json",
-            "temperature": 0.2,
-            "response_schema": response_schema,
-            "system_instruction": system_instruction
-        }
-    )
-    try:
-        return response.text
-    except Exception:
-        return "No review returned."
+    config = {
+        "response_mime_type": "application/json",
+        "temperature": 0.2,
+        "response_schema": response_schema,
+        "system_instruction": system_instruction
+    }
+    models_to_try = ["gemini-3-flash-preview", "gemini-2.5-flash"]
+    last_error = None
+    for model in models_to_try:
+        try:
+            print(f"Trying model {model} ...")
+            response = client.models.generate_content(
+                model=model,
+                contents=prompt,
+                config=config
+            )
+            return response.text
+        except Exception as e:
+            last_error = e
+            print(f"Model {model} failed: {e}. Retrying with next model...")
+    return "No review returned."
 
 def post_pr_comment(body):
     if not (GITHUB_TOKEN and repo_name and pr_number):
