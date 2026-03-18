@@ -209,7 +209,14 @@ def main():
     # Post one comment with all summaries and feedback
     if total_issues > 0:
         feedback = "\n\n<hr><h3 id=\"ai-feedback\">Was this feedback useful?</h3>\n\n- [ ] Yes\n- [ ] No"
-        full_comment = "<!-- ai-grammar-review-comment -->\n### ✏️ Grammar review summary\n\n" + "\n\n".join(summaries) + feedback
+        inner = "\n\n".join(summaries) + feedback
+        full_comment = (
+            "<!-- ai-grammar-review-comment -->\n"
+            "<details>\n"
+            "<summary><h3>✏️ Grammar review summary</h3></summary>\n\n"
+            + inner + "\n"
+            "</details>"
+        )
         post_pr_comment(full_comment)
         print("✅ Grammar review completed. Issues saved to issues.json and PR commented.")
     else:
