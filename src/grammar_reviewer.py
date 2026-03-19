@@ -27,8 +27,12 @@ def _parse_pr_number(value):
 
 pr_number = _parse_pr_number(event.get('pull_request', {}).get('number')) or _parse_pr_number(INPUT_PR_NUMBER)
 repo_name = event.get('repository', {}).get('full_name') or GITHUB_REPOSITORY
+_pull = event.get('pull_request') or {}
+_head = _pull.get('head') or {}
+head_sha = _head.get('sha') or os.environ.get('PR_HEAD_SHA') or os.environ.get('GITHUB_SHA') or ""
 print(f"Repo name: {repo_name}")
 print(f"PR number: {pr_number}")
+print(f"Head SHA: {head_sha or '(not set)'}")
 
 def _parse_folders_to_review():
     raw = os.environ.get('FOLDERS_TO_REVIEW', 'docs').strip()
@@ -210,12 +214,14 @@ def main():
     if total_issues > 0:
         feedback = "\n\n<hr><h3 id=\"ai-feedback\">Was this feedback useful?</h3>\n\n- [ ] Yes\n- [ ] No"
         inner = "\n\n".join(summaries) + feedback
+        footer = f"\n\nReview made on commit {head_sha}" if head_sha else "\n\nReview made on commit (unknown)"
         full_comment = (
             "<!-- ai-grammar-review-comment -->\n"
             "<details>\n"
             "<summary><h3>✏️ Grammar review summary</h3></summary>\n\n"
             + inner + "\n"
             "</details>"
+            + footer
         )
         post_pr_comment(full_comment)
         print("✅ Grammar review completed. Issues saved to issues.json and PR commented.")
