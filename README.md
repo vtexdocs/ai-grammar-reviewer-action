@@ -48,7 +48,7 @@ To use this action in your GitHub repository, follow these steps:
         grammar-review:
           runs-on: ubuntu-latest
           steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v6
             - uses: vtexdocs/ai-grammar-reviewer-action@v0
               with:
                 gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
@@ -82,7 +82,7 @@ To use this action in your GitHub repository, follow these steps:
         grammar-review:
           runs-on: ubuntu-latest
           steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v6
             - uses: vtexdocs/ai-grammar-reviewer-action@v0
               with:
                 gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
