@@ -10,6 +10,8 @@ This action executes a series of steps to read the Markdown files, use Google Ge
 
 The summary comment is a single comment in the PR formatted in Markdown and HTML including a summary of the review for each file reviewed. It also has a feedback option, which is collected by [another action](https://github.com/vtexdocs/dev-portal-content/blob/main/.github/workflows/get_feedback_on_ai_reviewer.yml).
 
+This comment uses `<details>` and `<summary>` tags to contract/expand the comment and avoid long texts in the PR page. It shows the commit ID which the review was done. Also, if the review is done more than once in the PR, the summary comment is edited instead of creating a new one.
+
 ![Summary comment example](./images/summary-comment-example.png)
 
 ### Inline suggestions
@@ -48,24 +50,71 @@ To use this action in your GitHub repository, follow these steps:
         grammar-review:
           runs-on: ubuntu-latest
           steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v6
             - uses: vtexdocs/ai-grammar-reviewer-action@v0
               with:
                 gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
                 github_token: ${{ secrets.GITHUB_TOKEN }}
     ```
 
-    The `folders` input is optional. When omitted, only changed files under `docs/` are reviewed. To choose which paths are reviewed, pass `folders` as a newline- or comma-separated list of folder prefixes (e.g. `docs`, `docs/guides`, `docs/release-notes`"):
+## Optional parameters
 
-    ```yml
-            - uses: vtexdocs/ai-grammar-reviewer-action@v0
-              with:
-                gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
-                github_token: ${{ secrets.GITHUB_TOKEN }}
-                folders: |
-                  docs/guides
-                  docs/release-notes
-    ```
+### Folders
+
+The action has an optional `folders` input. When omitted, only changed files under `docs/` are reviewed. To choose which paths are reviewed, pass `folders` as a newline- or comma-separated list of folder prefixes (e.g. `docs`, `docs/guides`, `docs/release-notes`):
+
+```yml
+        - uses: vtexdocs/ai-grammar-reviewer-action@v0
+          with:
+            gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            folders: |
+              docs/guides
+              docs/release-notes
+```
+
+### Workflow dispatch
+
+This action can also be triggered by `workflow_dispatch` events. For dispatch runs, pass the following optional parameters as input if the workflow is not triggered by `pull_request`:
+
+- `repository`
+- `pr_number`
+- `head_ref`
+- `base_ref`
+- `head_sha`
+
+These parameters are necessary for the workflow to identify the PR and to set the environment variables so that reviewdog posts the inline suggestions.
+
+> [!NOTE]
+> When triggering the action from a workflow with `workflow_dispatch`, [GitHub status checks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/about-status-checks) won't appear in the PR by default. A possible workaround can be applied using the [GitHub API](https://docs.github.com/en/rest/checks/runs) or the [octokit function](https://octokit.github.io/rest.js/v22/#checks-create) with [`actions/github-script`](https://github.com/marketplace/actions/github-script).
+
+```yml
+  on:
+    workflow_dispatch:
+      inputs:
+        pr_number:
+          description: 'Pull request number to review'
+          required: true
+          type: string
+
+  jobs:
+    grammar-review:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v6
+        - uses: vtexdocs/ai-grammar-reviewer-action@v0
+          with:
+            gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            repository: ${{ github.repository }}
+            pr_number: ${{ github.event.pull_request.number }}
+            head_ref: ${{ github.event.pull_request.head.ref }}
+            base_ref: ${{ github.event.pull_request.base.ref }}
+            head_sha: ${{ github.event.pull_request.head.sha }}
+```
+
+> [!IMPORTANT]
+> If no PR context is available (neither a `pull_request` event nor `pr_number` input), the action skips the review.
 
 ## Review tips
 

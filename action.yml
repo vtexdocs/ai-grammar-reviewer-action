@@ -11,6 +11,21 @@ inputs:
     description: 'Folder prefixes to review (newline- or comma-separated). Only changed files under these paths are reviewed.'
     required: false
     default: 'docs'
+  pr_number:
+    description: 'Optional pull request number. Required for workflow_dispatch or issue_comment runs that are not on a pull_request event.'
+    required: false
+  head_ref:
+    description: 'PR head branch (e.g. feature-branch). Required for reviewdog when pr_number is set.'
+    required: false
+  base_ref:
+    description: 'PR base branch (e.g. main). Required for reviewdog when pr_number is set.'
+    required: false
+  head_sha:
+    description: 'PR head commit SHA. Optional; used so reviewdog posts against the correct commit.'
+    required: false
+  repository:
+    description: 'Repository in owner/repo form (e.g. octocat/my-repo). Required when pr_number is set so reviewdog can call the GitHub API.'
+    required: false
 runs:
   using: 'docker'
   image: 'Dockerfile'
@@ -18,5 +33,12 @@ runs:
     GEMINI_API_KEY: ${{ inputs.gemini_api_key }}
     GITHUB_TOKEN: ${{ inputs.github_token }}
     REVIEWDOG_GITHUB_API_TOKEN: ${{ inputs.github_token }}
+    GITHUB_REPOSITORY: ${{ inputs.repository || github.repository }}
+    GITHUB_SHA: ${{ github.sha }}
     FOLDERS_TO_REVIEW: ${{ inputs.folders }}
+    PR_NUMBER: ${{ inputs.pr_number }}
+    PR_HEAD_REF: ${{ inputs.head_ref }}
+    PR_BASE_REF: ${{ inputs.base_ref }}
+    PR_HEAD_SHA: ${{ inputs.head_sha }}
+    GITHUB_EVENT_NAME: ${{ inputs.pr_number != '' && 'pull_request' || '' }}
   args: []
