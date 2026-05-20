@@ -118,7 +118,7 @@ def review_grammar(file_path):
         "response_schema": response_schema,
         "system_instruction": system_instruction
     }
-    models_to_try = ["gemini-3-flash-preview", "gemini-2.5-flash"]
+    models_to_try = ["gemini-3.5-flash", "gemini-3-flash-preview", "gemini-2.5-flash", "gemini-3.1-flash-lite-preview"]
     last_error = None
     for model in models_to_try:
         try:
