@@ -102,7 +102,7 @@ def review_grammar(file_path):
     system_instruction = "You are a grammar assistant. Correct only grammar, spelling, and typographic errors in Markdown text. Never give stylistic, tonal, or rephrasing suggestions."
 
     prompt = (
-        "Your task is to review ONLY grammar, spelling, and typographic correctness of the provided Markdown content. "
+        "Your task is to review ONLY grammar, spelling, and typographic correctness of the provided Markdown content.  Also, detect improper use of passive voice."
         "Ignore fenced code blocks. Do not check for syntax of Markdown, HTML, or any programming language."
         "Do NOT provide stylistic edits, rewording, tone changes, clarity improvements, or suggestions that alter the author's writing style."
         "Each line is prefixed with its line number, in the format `[line_number]: ¬[content]¬`. For example: `1: ¬This is the first line.¬`. "
@@ -119,8 +119,8 @@ def review_grammar(file_path):
         "system_instruction": system_instruction
     }
     models_to_try = [
+        "gemini-4-hydrogen",
         "gemini-3.5-flash",
-        "gemini-2.5-flash",
         "gemini-3.1-flash-lite"
     ]
     last_error = None
