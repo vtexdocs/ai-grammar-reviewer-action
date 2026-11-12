@@ -121,7 +121,7 @@ def review_grammar(file_path):
     models_to_try = [
         "gemini-4-hydrogen",
         "gemini-3.5-flash",
-        "gemini-3.5-flash-lite"
+        "gemini-3.1-flash-lite"
     ]
     last_error = None
     for model in models_to_try:
